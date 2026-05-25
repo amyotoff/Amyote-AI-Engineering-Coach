@@ -75,6 +75,7 @@ onMessage(async (msg) => {
       }
     };
 
+    const enabledHarnesses = process.env.ENABLED_HARNESSES ? JSON.parse(process.env.ENABLED_HARNESSES) : undefined;
     const { result, dirMetas } = await parseAllLogsAsyncDetailed(logsDirs, (progress) => {
       const progressMessage: ProgressMessage = { type: 'progress', progress };
       const now = Date.now();
@@ -93,7 +94,7 @@ onMessage(async (msg) => {
       } else {
         pending = progressMessage;
       }
-    });
+    }, enabledHarnesses);
     // Flush any final pending progress before sending result.
     flushPending();
 

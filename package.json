@@ -62,6 +62,11 @@
         "command": "aiEngineerCoach.reviewLocalRules",
         "title": "AI Engineer Coach: Review Local Rule Approvals",
         "icon": "$(shield)"
+      },
+      {
+        "command": "aiEngineerCoach.setLlmApiKey",
+        "title": "AI Engineer Coach: Set Custom LLM API Key",
+        "icon": "$(key)"
       }
     ],
     "viewsContainers": {
@@ -81,6 +86,44 @@
           "type": "webview"
         }
       ]
+    },
+    "configuration": {
+      "title": "AI Engineer Coach",
+      "properties": {
+        "aiEngineerCoach.enabledHarnesses": {
+          "type": "array",
+          "default": [
+            "VS Code",
+            "Xcode",
+            "Claude",
+            "Codex",
+            "OpenCode",
+            "Antigravity"
+          ],
+          "items": {
+            "type": "string",
+            "enum": [
+              "VS Code",
+              "Xcode",
+              "Claude",
+              "Codex",
+              "OpenCode",
+              "Antigravity"
+            ]
+          },
+          "description": "Select which AI assistant logs to parse and analyze. Uncheck Copilot to avoid scanning its large logs."
+        },
+        "aiEngineerCoach.llmEndpoint": {
+          "type": "string",
+          "default": "",
+          "description": "Custom OpenAI-compatible LLM endpoint (e.g. http://localhost:11434/v1/chat/completions). If empty, uses GitHub Copilot (vscode.lm)."
+        },
+        "aiEngineerCoach.llmModel": {
+          "type": "string",
+          "default": "",
+          "description": "Model ID to use for the custom endpoint (e.g. llama3, gemini-1.5-pro)."
+        }
+      }
     }
   },
   "scripts": {

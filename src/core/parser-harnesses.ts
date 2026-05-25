@@ -10,6 +10,7 @@ import { Workspace, Session } from './types';
 import { findClaudeDirs, parseClaudeSessions, parseClaudeSessionsAsync } from './parser-claude';
 import { findCodexDirs, parseCodexSessions } from './parser-codex';
 import { findOpenCodeDirs, parseOpenCodeSessions } from './parser-opencode';
+import { findAntigravityDirs, parseAntigravitySessions } from './parser-antigravity';
 
 type WorkspaceMap = Map<string, Workspace>;
 
@@ -69,6 +70,14 @@ const EXTERNAL_HARNESSES: ExternalHarnessCollector[] = [
       }
     },
   },
+  {
+    name: 'Antigravity',
+    collectSync(ctx) {
+      for (const antigravityDir of findAntigravityDirs()) {
+        for (const session of parseAntigravitySessions(antigravityDir)) addSession(ctx.workspaces, ctx.sessions, session, antigravityDir);
+      }
+    },
+  },
 ];
 
 export interface ExternalHarnessProgressHandlers {
@@ -78,9 +87,10 @@ export interface ExternalHarnessProgressHandlers {
   yieldToLoop?: () => Promise<void>;
 }
 
-export function collectExternalHarnessesSync(workspaces: WorkspaceMap, sessions: Session[]): void {
+export function collectExternalHarnessesSync(workspaces: WorkspaceMap, sessions: Session[], enabledHarnesses?: string[]): void {
   const ctx: HarnessCollectionContext = { workspaces, sessions };
   for (const harness of EXTERNAL_HARNESSES) {
+    if (enabledHarnesses && !enabledHarnesses.includes(harness.name)) continue;
     harness.collectSync(ctx);
   }
 }
@@ -93,18 +103,21 @@ export const EXTERNAL_HARNESS_SET = new Set<string>([
   'Claude',
   'Codex',
   'OpenCode',
+  'Antigravity',
 ]);
 
 export async function collectExternalHarnessesAsync(
   workspaces: WorkspaceMap,
   sessions: Session[],
   handlers: ExternalHarnessProgressHandlers = {},
+  enabledHarnesses?: string[],
 ): Promise<void> {
   const ctx: HarnessCollectionContext = { workspaces, sessions };
   const total = EXTERNAL_HARNESSES.length;
 
   for (let index = 0; index < EXTERNAL_HARNESSES.length; index++) {
     const harness = EXTERNAL_HARNESSES[index];
+    if (enabledHarnesses && !enabledHarnesses.includes(harness.name)) continue;
     handlers.onHarnessStart?.(harness.name, index, total, sessions.length);
     if (handlers.yieldToLoop) await handlers.yieldToLoop();
 

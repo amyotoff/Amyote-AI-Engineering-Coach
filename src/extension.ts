@@ -189,7 +189,27 @@ export function activate(context: vscode.ExtensionContext) {
       }
       await promptAndReload();
     }),
+    vscode.commands.registerCommand('aiEngineerCoach.setLlmApiKey', async () => {
+      runtimeDebug('extension', 'command-set-llm-api-key');
+      const key = await vscode.window.showInputBox({
+        prompt: 'Enter the API key for your custom LLM endpoint',
+        password: true,
+        placeHolder: 'sk-...',
+        ignoreFocusOut: true,
+      });
+      if (key === undefined) return; // cancelled
+      if (key === '') {
+        await context.secrets.delete('llmApiKey');
+        vscode.window.showInformationMessage('Custom LLM API key removed.');
+      } else {
+        await context.secrets.store('llmApiKey', key);
+        vscode.window.showInformationMessage('Custom LLM API key stored securely.');
+      }
+    }),
   );
+
+  // Provide SecretStorage to the LLM module so it can read the API key securely.
+  void import('./webview/panel-llm').then(m => m.setSecretStorage(context.secrets));
 
   void ready.then(() => loadPanelModule()).then(({ DashboardSidebarProvider }) => {
     const sidebarProvider = new DashboardSidebarProvider(context.extensionUri);

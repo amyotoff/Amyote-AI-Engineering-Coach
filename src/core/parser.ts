@@ -98,8 +98,11 @@ function pct(phase: number, intraPhase: number): number {
   return Math.min(100, Math.round(base + width * Math.max(0, Math.min(1, intraPhase))));
 }
 
-export function findLogsDirs(): string[] {
-  return [...findVsCodeDirs(), ...findXcodeDirs()];
+export function findLogsDirs(enabledHarnesses?: string[]): string[] {
+  const dirs: string[] = [];
+  if (!enabledHarnesses || enabledHarnesses.includes('VS Code')) dirs.push(...findVsCodeDirs());
+  if (!enabledHarnesses || enabledHarnesses.includes('Xcode')) dirs.push(...findXcodeDirs());
+  return dirs;
 }
 
 function partitionDirs(logsDirs: string[]): { vsCodeDirs: string[]; xcodeDirs: string[] } {
@@ -445,6 +448,7 @@ async function collectExternalHarnesses(
   workspaces: Map<string, Workspace>,
   sessions: import('./types').Session[],
   onProgress?: ProgressCallback,
+  enabledHarnesses?: string[],
 ): Promise<void> {
   await collectExternalHarnessesAsync(workspaces, sessions, {
     onHarnessStart: (name, index, total, sessionCount) => {
@@ -457,7 +461,7 @@ async function collectExternalHarnesses(
       warnCore('parser', `${name} scan failed`, error);
     },
     yieldToLoop,
-  });
+  }, enabledHarnesses);
 }
 
 export function parseAllLogs(logsDirs: string[]): ParseResult {
@@ -493,6 +497,7 @@ export function parseAllLogs(logsDirs: string[]): ParseResult {
 export async function parseAllLogsAsyncDetailed(
   logsDirs: string[],
   onProgress?: ProgressCallback,
+  enabledHarnesses?: string[],
 ): Promise<{ result: ParseResult; dirMetas: DirMetas }> {
 
   const report: ReportProgress = (p) => {
@@ -584,7 +589,7 @@ export async function parseAllLogsAsyncDetailed(
 
     const { xcodeDirs } = partitionDirs(logsDirs);
     await collectXcode(xcodeDirs, workspaces, freshSessions, onProgress);
-    await collectExternalHarnesses(workspaces, freshSessions, onProgress);
+    await collectExternalHarnesses(workspaces, freshSessions, onProgress, enabledHarnesses);
 
     const result: ParseResult = { workspaces, sessions: freshSessions, editLocIndex, sessionSourceIndex: freshSessionSourceIndex };
     stripSessionsForMemory(result.sessions);
@@ -606,7 +611,7 @@ export async function parseAllLogsAsyncDetailed(
   await processWorkspaces(entries, totalDirs, ctx, onProgress);
 
   await collectXcode(xcodeDirs, workspaces, sessions, onProgress);
-  await collectExternalHarnesses(workspaces, sessions, onProgress);
+  await collectExternalHarnesses(workspaces, sessions, onProgress, enabledHarnesses);
 
   const result: ParseResult = { workspaces, sessions, editLocIndex, sessionSourceIndex };
   stripSessionsForMemory(result.sessions);
@@ -618,14 +623,16 @@ export async function parseAllLogsAsyncDetailed(
 export async function parseAllLogsAsync(
   logsDirs: string[],
   onProgress?: ProgressCallback,
+  enabledHarnesses?: string[],
 ): Promise<ParseResult> {
-  const { result } = await parseAllLogsAsyncDetailed(logsDirs, onProgress);
+  const { result } = await parseAllLogsAsyncDetailed(logsDirs, onProgress, enabledHarnesses);
   return result;
 }
 
 export async function parseAllLogsViaWorker(
   logsDirs: string[],
   onProgress?: ProgressCallback,
+  enabledHarnesses?: string[],
 ): Promise<ParseResult> {
   let forkFn: typeof import('child_process').fork;
   try {
@@ -645,6 +652,12 @@ export async function parseAllLogsViaWorker(
       try {
         child = forkFn(workerPath, [], {
           execArgv: [`--max-old-space-size=${maxOldSpaceMb}`],
+          env: {
+            ...process.env,
+            ...(enabledHarnesses && enabledHarnesses.length > 0
+              ? { ENABLED_HARNESSES: JSON.stringify(enabledHarnesses) }
+              : {}),
+          },
           stdio: ['ignore', 'ignore', 'ignore', 'ipc'],
         });
       } catch {

@@ -1,4 +1,8 @@
-<h1 align="center">AI Engineer Coach</h1>
+<h1 align="center">🧠 AI Engineer Coach</h1>
+
+<p align="center">
+  <em>Fork of <a href="https://github.com/microsoft/ai-engineering-coach">microsoft/ai-engineering-coach</a> with <strong>Antigravity</strong> support &amp; security hardening.</em>
+</p>
 
 <p align="center">
 <strong>better agentic engineering.</strong><br>
@@ -7,7 +11,8 @@ Analyze your AI coding assistant usage — any harness, one dashboard.
 
 <p align="center">
 <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
-<img alt="VS Code 1.115+" src="https://img.shields.io/badge/VS%20Code-1.115%2B-007ACC">
+<img alt="VS Code 1.118+" src="https://img.shields.io/badge/VS%20Code-1.118%2B-007ACC">
+<img alt="Antigravity" src="https://img.shields.io/badge/harness-Antigravity-8B5CF6">
 </p>
 
 <br>
@@ -20,14 +25,27 @@ https://github.com/user-attachments/assets/9f0239bf-20e0-459f-b137-17cce0edd1b2
 
 ---
 
+## What's different in this fork
+
+| Area | Change |
+|------|--------|
+| 🔌 **Antigravity harness** | New parser reads `~/.gemini/antigravity-ide/brain/` transcripts — sessions, tool calls, edited files |
+| 🔒 **Secure API key** | `llmApiKey` moved from plaintext `settings.json` → VS Code **SecretStorage** |
+| 🛡️ **Lint-clean parser** | Zero `any`, complexity ≤ 20, nesting ≤ 4, cross-platform workspace detection |
+| 🧪 **Tests** | `parser-antigravity.test.ts` — 8 test cases covering parsing, tools, model extraction |
+| ⏱️ **LLM timeout** | Custom LLM endpoint now respects `LLM_REQUEST_TIMEOUT_MS` (90 s) instead of hanging forever |
+| 🐛 **Empty harnesses fix** | Worker no longer silently skips all parsing when `enabledHarnesses` is `undefined` |
+
+---
+
 ## What it does
 
 AI Engineer Coach reads your local AI session logs and turns them into actionable insights — no data leaves your machine.
 
-- **Track progress** -- practice scores, weekly trends, daily activity charts
-- **Detect anti-patterns** -- 45 rules across prompt quality, session hygiene, code review, tool mastery, and context management
-- **Measure output** -- AI-generated code volume by language, workspace, model, and harness
-- **Discover skills** -- find repeated prompts and turn them into reusable skills
+- **Track progress** — practice scores, weekly trends, daily activity charts
+- **Detect anti-patterns** — 45 rules across prompt quality, session hygiene, code review, tool mastery, and context management
+- **Measure output** — AI-generated code volume by language, workspace, model, and harness
+- **Discover skills** — find repeated prompts and turn them into reusable skills
 - **Score context health** — agentic readiness checks, instruction-file audits, workspace context maps
 
 <details>
@@ -53,8 +71,8 @@ AI Engineer Coach reads your local AI session logs and turns them into actionabl
 ## Quick Start
 
 ```bash
-git clone https://github.com/microsoft/ai-engineering-coach.git
-cd ai-engineering-coach
+git clone https://github.com/amyotoff/Amyote-AI-Engineering-Coach.git
+cd Amyote-AI-Engineering-Coach
 npm install
 npm run package
 ```
@@ -79,6 +97,19 @@ code --install-extension (Get-ChildItem . -Filter 'ai-engineer-coach-*.vsix' | S
 
 ---
 
+## Supported Harnesses
+
+| Harness | Source |
+|---------|--------|
+| **VS Code** (GitHub Copilot) | Built-in chat & edit session logs |
+| **Xcode** (Copilot for Xcode) | Copilot Xcode plugin databases |
+| **Claude Code** | `~/.claude/` project sessions |
+| **Codex CLI** | `~/.codex/sessions/` rollout logs |
+| **OpenCode** | `~/.local/share/opencode/` sessions |
+| **Antigravity** ⚡ | `~/.gemini/antigravity-ide/brain/` transcripts |
+
+---
+
 ## Pages
 
 ### Observe
@@ -93,7 +124,7 @@ code --install-extension (Get-ChildItem . -Filter 'ai-engineer-coach-*.vsix' | S
 
 | Page | Description |
 |------|-------------|
-| **Output** | Generated code volume by language, model usage table *(token breakdown temporarily hidden)* |
+| **Output** | Generated code volume by language, model usage table |
 | **Burndown** | Monthly AI token budget progress with projections *(temporarily disabled)* |
 | **Patterns** | 7×24 activity heatmap and work-life balance signals |
 
@@ -119,28 +150,40 @@ code --install-extension (Get-ChildItem . -Filter 'ai-engineer-coach-*.vsix' | S
 
 ---
 
-## Privacy
+## Configuration
+
+### VS Code Settings (`Cmd+,` / `Ctrl+,`)
+
+| Setting | Description |
+|---------|-------------|
+| **`aiEngineerCoach.enabledHarnesses`** | Select which AI assistant logs to parse. Uncheck "VS Code" to skip Copilot's large logs and focus on Antigravity, Claude, Codex, etc. |
+| **`aiEngineerCoach.llmEndpoint`** | Custom OpenAI-compatible LLM endpoint (e.g. `http://localhost:11434/v1/chat/completions` for Ollama). If empty, uses GitHub Copilot's built-in model. |
+| **`aiEngineerCoach.llmModel`** | Model ID for the custom endpoint (e.g. `llama3`, `gemini-2.5-pro`). |
+
+### Commands (`Cmd+Shift+P` / `Ctrl+Shift+P`)
+
+| Command | Description |
+|---------|-------------|
+| **AI Engineer Coach: Open Dashboard** | Launch the main dashboard |
+| **AI Engineer Coach: Reload Data** | Force re-parse all session logs |
+| **AI Engineer Coach: Set Custom LLM API Key** | Securely store your API key in VS Code SecretStorage (never written to `settings.json`) |
+| **AI Engineer Coach: Review Local Rule Approvals** | Approve or revoke trust for custom rule files found on disk |
+
+---
+
+## Privacy & Security
 
 - **Read-only** — the extension never modifies your session files
 - **Local analysis** — all parsing and analytics run entirely on your machine
-- **No proprietary telemetry** — the extension does not phone home or collect usage data
+- **No telemetry** — the extension does not phone home or collect usage data
+- **Secure key storage** — custom LLM API keys are stored in VS Code SecretStorage, not in plaintext settings
 - **Optional AI features** — some features (rule compiler, skill finder, context review) use the VS Code built-in Copilot language model API when explicitly invoked by the user
 
 ---
 
-## Code of Conduct
+## Upstream
 
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
-For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
-contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
-
-## Trademarks
-
-This project may contain trademarks or logos for projects, products, or services. Authorized use of Microsoft
-trademarks or logos is subject to and must follow
-[Microsoft's Trademark & Brand Guidelines](https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks/usage/general).
-Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship.
-Any use of third-party trademarks or logos are subject to those third-party's policies.
+This fork tracks [microsoft/ai-engineering-coach](https://github.com/microsoft/ai-engineering-coach). Original project by Sanjay Singh, Joy Distelbrink, Tamas Boncz, and Aymen Furter.
 
 ## License
 
@@ -148,4 +191,4 @@ Any use of third-party trademarks or logos are subject to those third-party's po
 
 ## Disclaimer
 
-This project is an open-source community effort by Microsoft employees. It is **not** an official Microsoft product and is not part of any Microsoft service or support offering. It is provided as-is with no warranties or guarantees.
+This project is based on an open-source community effort by Microsoft employees. It is **not** an official Microsoft product and is not part of any Microsoft service or support offering. It is provided as-is with no warranties or guarantees.
