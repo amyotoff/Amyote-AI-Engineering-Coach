@@ -49,9 +49,11 @@ export default tseslint.config(
       "complexity": ["warn", { max: 20 }],
       "max-depth": ["warn", { max: 4 }],
 
-      // no-unsanitized (XSS detection, warn-only for sandboxed webview)
-      "no-unsanitized/property": "warn",
-      "no-unsanitized/method": "warn",
+      // no-unsanitized (XSS detection) — error: untrusted HTML/script sinks
+      // must never reach the webview. Known-safe static assignments are
+      // opted out with an inline eslint-disable + justification.
+      "no-unsanitized/property": "error",
+      "no-unsanitized/method": "error",
 
       // import-x (circular deps, ordering)
       "import-x/no-cycle": "warn",

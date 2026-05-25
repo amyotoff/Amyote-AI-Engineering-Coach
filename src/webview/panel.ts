@@ -21,6 +21,35 @@ import { isRequestMessage, postResponse, errorResult } from './panel-shared';
 
 export { DashboardSidebarProvider } from './panel-sidebar';
 
+/**
+ * Hosts the webview is allowed to open externally. The webview only opens
+ * social-share and project links; anything else (especially `javascript:`,
+ * `file:`, `data:`, `vscode:` URIs or unknown hosts) is rejected to avoid the
+ * webview being able to launch arbitrary URIs on the host machine.
+ */
+const ALLOWED_EXTERNAL_HOSTS = new Set<string>([
+  'github.com',
+  'x.com',
+  'twitter.com',
+  'www.linkedin.com',
+  'linkedin.com',
+  'www.reddit.com',
+  'reddit.com',
+  'news.ycombinator.com',
+]);
+
+/** Validate a webview-supplied URL: https only, and host on the allowlist. */
+function isAllowedExternalUrl(raw: string): boolean {
+  let parsed: URL;
+  try {
+    parsed = new URL(raw);
+  } catch {
+    return false;
+  }
+  if (parsed.protocol !== 'https:') return false;
+  return ALLOWED_EXTERNAL_HOSTS.has(parsed.hostname.toLowerCase());
+}
+
 export class DashboardPanel {
   private static instance: DashboardPanel | undefined;
   private static readonly viewType = 'aiEngineerCoach';
@@ -270,9 +299,12 @@ export class DashboardPanel {
     // Open external URLs from webview
     if (msg.method === 'openExternal') {
       const url = (msg.params as Record<string, unknown> | undefined)?.url;
-      if (typeof url === 'string') {
+      if (typeof url === 'string' && isAllowedExternalUrl(url)) {
         void vscode.env.openExternal(vscode.Uri.parse(url));
         postResponse(this.panel.webview, msg.id, { ok: true });
+      } else {
+        runtimeDebug('panel', 'openExternal-rejected', String(url));
+        postResponse(this.panel.webview, msg.id, { ok: false });
       }
       return;
     }
