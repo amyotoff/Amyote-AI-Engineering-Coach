@@ -382,6 +382,7 @@ function handleProgress(msg: { phase: number; detail?: string; pct: number; sess
   if (tickerEl && msg.sessions && msg.sessions > 0) {
     if (!tickerEl.dataset.init) {
       tickerEl.dataset.init = '1';
+      // eslint-disable-next-line no-unsanitized/property -- static, hard-coded SVG/markup below; no user or session data is interpolated.
       tickerEl.innerHTML = [
         `<span class="ticker-stat" id="ts-loc"><svg class="ticker-icon" viewBox="0 0 16 16" fill="none"><path d="M4 2h5l3 3v9H4V2z" stroke="currentColor" stroke-width="1.3"/><path d="M6 8h4M6 10.5h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg><span class="ticker-value" id="tv-loc">0</span> lines generated</span>`,
         `<span class="ticker-stat" id="ts-tools"><svg class="ticker-icon" viewBox="0 0 16 16" fill="none"><path d="M10.3 2.5a2.2 2.2 0 0 0-3 3.1L3.5 9.4l-.9 3.1 3.1-.9 3.8-3.8a2.2 2.2 0 0 0 3.1-3l-1.6 1.6-1.1-1.1L11.5 3.7z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="ticker-value" id="tv-tools">0</span> tool calls</span>`,

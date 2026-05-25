@@ -173,11 +173,25 @@ code --install-extension (Get-ChildItem . -Filter 'ai-engineer-coach-*.vsix' | S
 
 ## Privacy & Security
 
+- **Local by default** — data leaves your machine only when you explicitly invoke an AI-powered feature or configure a custom LLM endpoint. All session parsing, analytics, and dashboards run entirely on your machine.
 - **Read-only** — the extension never modifies your session files
-- **Local analysis** — all parsing and analytics run entirely on your machine
 - **No telemetry** — the extension does not phone home or collect usage data
 - **Secure key storage** — custom LLM API keys are stored in VS Code SecretStorage, not in plaintext settings
-- **Optional AI features** — some features (rule compiler, skill finder, context review) use the VS Code built-in Copilot language model API when explicitly invoked by the user
+- **Restricted external links** — the dashboard can only open `https://` links to a fixed allowlist of hosts (GitHub and social-share sites); arbitrary URIs are rejected
+
+### Which features send data to an LLM
+
+The AI-powered features below send the relevant context (session metadata, code snippets, prompts) to the configured language model — VS Code's built-in Copilot model by default, or your **custom LLM endpoint** if set. Everything else stays local.
+
+- **Skill authoring** — generating or filling in skill content
+- **Learning quizzes** — generating practice questions from your sessions
+- **Resource recommendations** — suggesting docs/articles relevant to your work
+- **Code comparisons & "Did You Know" insights** — generating snippet comparisons and tips
+- **AI triage & catalog discovery** — ranking skills and discovering catalog items
+- **Context / memory review** — extracting facts and reviewing rule/context files
+- **Explanations & SDLC analysis** — on-demand explanations and SDLC tool/repo analysis
+
+These run only when you explicitly trigger them. If neither Copilot nor a custom endpoint is available, the features are skipped and no data is sent.
 
 ---
 
