@@ -1,6 +1,10 @@
 <h1 align="center">AI Engineer Coach</h1>
 
 <p align="center">
+  <em>⚠️ <strong>Note:</strong> This repository is a fork of <a href="https://github.com/microsoft/ai-engineering-coach.git">microsoft/ai-engineering-coach</a>.</em>
+</p>
+
+<p align="center">
 <strong>better agentic engineering.</strong><br>
 Analyze your AI coding assistant usage — any harness, one dashboard.
 </p>
@@ -53,7 +57,7 @@ AI Engineer Coach reads your local AI session logs and turns them into actionabl
 ## Quick Start
 
 ```bash
-git clone https://github.com/microsoft/ai-engineering-coach.git
+git clone https://github.com/amyotoff/Amyote-AI-Engineering-Coach.git
 cd ai-engineering-coach
 npm install
 npm run package
@@ -116,6 +120,17 @@ code --install-extension (Get-ChildItem . -Filter 'ai-engineer-coach-*.vsix' | S
 | **Achievements** | XP-based progression with Bronze → Silver → Gold → Diamond tiers |
 | **Agentic SDLC** | How you use AI across the full software-development lifecycle |
 | **Share** | Generate a shareable stat card |
+
+---
+
+## Configuration
+
+You can customize AI Engineer Coach via VS Code settings (`Cmd+,` / `Ctrl+,`):
+
+*   **`aiEngineerCoach.enabledHarnesses`**: Select which AI assistant logs to parse and analyze. You can uncheck "VS Code" to avoid scanning GitHub Copilot logs, focusing only on local tools like Codex, Antigravity, or Claude Code.
+*   **`aiEngineerCoach.llmEndpoint`**: Use a Custom OpenAI-compatible LLM endpoint (e.g., `http://localhost:11434/v1/chat/completions` for Ollama, or a proxy for Gemini) instead of GitHub Copilot's API for AI features.
+*   **`aiEngineerCoach.llmApiKey`**: Optional API key for your custom endpoint.
+*   **`aiEngineerCoach.llmModel`**: Model ID to use (e.g., `llama3`, `gemini-1.5-pro`).
 
 ---
 

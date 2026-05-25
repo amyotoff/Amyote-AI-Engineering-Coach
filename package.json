@@ -17,7 +17,7 @@
     "url": "https://github.com/microsoft/AI-Engineering-Coach/issues"
   },
   "engines": {
-    "vscode": "^1.118.0"
+    "vscode": "^1.107.0"
   },
   "categories": [
     "Other",
@@ -75,6 +75,49 @@
           "type": "webview"
         }
       ]
+    },
+    "configuration": {
+      "title": "AI Engineer Coach",
+      "properties": {
+        "aiEngineerCoach.enabledHarnesses": {
+          "type": "array",
+          "default": [
+            "VS Code",
+            "Xcode",
+            "Claude",
+            "Codex",
+            "OpenCode",
+            "Antigravity"
+          ],
+          "items": {
+            "type": "string",
+            "enum": [
+              "VS Code",
+              "Xcode",
+              "Claude",
+              "Codex",
+              "OpenCode",
+              "Antigravity"
+            ]
+          },
+          "description": "Select which AI assistant logs to parse and analyze. Uncheck Copilot to avoid scanning its large logs."
+        },
+        "aiEngineerCoach.llmEndpoint": {
+          "type": "string",
+          "default": "",
+          "description": "Custom OpenAI-compatible LLM endpoint (e.g. http://localhost:11434/v1/chat/completions). If empty, uses GitHub Copilot (vscode.lm)."
+        },
+        "aiEngineerCoach.llmApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "Optional API key for the custom LLM endpoint."
+        },
+        "aiEngineerCoach.llmModel": {
+          "type": "string",
+          "default": "",
+          "description": "Model ID to use for the custom endpoint (e.g. llama3, gemini-1.5-pro)."
+        }
+      }
     }
   },
   "scripts": {
@@ -116,7 +159,7 @@
     "@eslint/js": "10.0.1",
     "@playwright/test": "1.60.0",
     "@types/node": "25.9.1",
-    "@types/vscode": "1.118.0",
+    "@types/vscode": "1.107.0",
     "@vitest/coverage-v8": "4.1.6",
     "@vscode/vsce": "3.9.1",
     "cspell": "10.0.0",

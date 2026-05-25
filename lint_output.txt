@@ -1,0 +1,162 @@
+
+> ai-engineer-coach@0.1.0 lint
+> eslint src/
+
+
+/Users/Amyote/.gemini/antigravity-ide/scratch/ai-engineering-coach/src/core/analyzer-config.test.ts
+  75:10  warning  This assertion is unnecessary since it does not change the type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+
+/Users/Amyote/.gemini/antigravity-ide/scratch/ai-engineering-coach/src/core/analyzer-config.ts
+  330:3  warning  Method 'computeContextProvisionByHarness' has a complexity of 23. Maximum allowed is 20  complexity
+
+/Users/Amyote/.gemini/antigravity-ide/scratch/ai-engineering-coach/src/core/analyzer-consumption.ts
+  712:3  warning  Method 'buildAiCreditBurndownData' has a complexity of 22. Maximum allowed is 20  complexity
+
+/Users/Amyote/.gemini/antigravity-ide/scratch/ai-engineering-coach/src/core/analyzer-images.ts
+  114:3   warning  Method 'getImageGallery' has a complexity of 23. Maximum allowed is 20  complexity
+  264:45  warning  Use `for…of` instead of `.forEach(…)`                                   unicorn/no-array-for-each
+  325:22  warning  Prefer `String#replaceAll()` over `String#replace()`                    unicorn/prefer-string-replace-all
+
+/Users/Amyote/.gemini/antigravity-ide/scratch/ai-engineering-coach/src/core/analyzer-production.ts
+  15:3  warning  Method 'getCodeProduction' has a complexity of 27. Maximum allowed is 20  complexity
+
+/Users/Amyote/.gemini/antigravity-ide/scratch/ai-engineering-coach/src/core/analyzer.test.ts
+  387:41  warning  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+  396:41  warning  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+  401:47  warning  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+  408:41  warning  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+  420:41  warning  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+
+/Users/Amyote/.gemini/antigravity-ide/scratch/ai-engineering-coach/src/core/dsl/dsl.test.ts
+  215:26  warning  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+  249:26  warning  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+
+/Users/Amyote/.gemini/antigravity-ide/scratch/ai-engineering-coach/src/core/dsl/interpreter.ts
+  136:26  warning  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+
+/Users/Amyote/.gemini/antigravity-ide/scratch/ai-engineering-coach/src/core/metric-engine.ts
+  188:47  warning  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+  243:42  warning  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+
+/Users/Amyote/.gemini/antigravity-ide/scratch/ai-engineering-coach/src/core/parser-antigravity.ts
+   27:59  error    Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+   44:22  warning  Unsafe argument of type `any` assigned to a parameter of type `AntigravityStep`    @typescript-eslint/no-unsafe-argument
+   55:75  error    Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+   62:8   warning  Function 'parseAntigravitySessions' has a complexity of 35. Maximum allowed is 20  complexity
+  126:11  warning  Blocks are nested too deeply (5). Maximum allowed is 4                             max-depth
+  134:11  warning  Blocks are nested too deeply (5). Maximum allowed is 4                             max-depth
+  135:13  warning  Blocks are nested too deeply (6). Maximum allowed is 4                             max-depth
+  136:13  warning  Blocks are nested too deeply (6). Maximum allowed is 4                             max-depth
+  138:15  warning  Blocks are nested too deeply (7). Maximum allowed is 4                             max-depth
+
+/Users/Amyote/.gemini/antigravity-ide/scratch/ai-engineering-coach/src/core/parser-claude.test.ts
+  307:8  warning  Prefer `String#replaceAll()` over `String#replace()`  unicorn/prefer-string-replace-all
+  338:8  warning  Prefer `String#replaceAll()` over `String#replace()`  unicorn/prefer-string-replace-all
+  381:8  warning  Prefer `String#replaceAll()` over `String#replace()`  unicorn/prefer-string-replace-all
+
+/Users/Amyote/.gemini/antigravity-ide/scratch/ai-engineering-coach/src/core/parser-claude.ts
+  125:1   warning  Function 'isClaudeLine' has a complexity of 29. Maximum allowed is 20                complexity
+  251:1   warning  Function 'collectClaudeAssistantData' has a complexity of 25. Maximum allowed is 20  complexity
+  299:11  warning  Blocks are nested too deeply (5). Maximum allowed is 4                               max-depth
+  326:15  warning  Prefer `String#replaceAll()` over `String#replace()`                                 unicorn/prefer-string-replace-all
+  405:1   warning  Function 'parseClaudeProjectSessions' has a complexity of 32. Maximum allowed is 20  complexity
+
+/Users/Amyote/.gemini/antigravity-ide/scratch/ai-engineering-coach/src/core/parser-shared.test.ts
+  7:48  warning  './parser-shared' imported multiple times  import-x/no-duplicates
+  8:46  warning  './parser-shared' imported multiple times  import-x/no-duplicates
+
+/Users/Amyote/.gemini/antigravity-ide/scratch/ai-engineering-coach/src/core/parser-shared.ts
+  317:12  warning  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+
+/Users/Amyote/.gemini/antigravity-ide/scratch/ai-engineering-coach/src/core/parser-vscode-cli.ts
+  219:1  warning  Function 'handleToolExecutionStart' has a complexity of 22. Maximum allowed is 20  complexity
+
+/Users/Amyote/.gemini/antigravity-ide/scratch/ai-engineering-coach/src/core/parser-vscode-files.ts
+  143:41  warning  This assertion is unnecessary since it does not change the type of the expression             @typescript-eslint/no-unnecessary-type-assertion
+  144:18  warning  This assertion is unnecessary since it does not change the type of the expression             @typescript-eslint/no-unnecessary-type-assertion
+  152:6   warning  This assertion is unnecessary since it does not change the type of the expression             @typescript-eslint/no-unnecessary-type-assertion
+  162:40  warning  This assertion is unnecessary since it does not change the type of the expression             @typescript-eslint/no-unnecessary-type-assertion
+  163:17  warning  This assertion is unnecessary since it does not change the type of the expression             @typescript-eslint/no-unnecessary-type-assertion
+  222:17  warning  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+
+/Users/Amyote/.gemini/antigravity-ide/scratch/ai-engineering-coach/src/core/parser-vscode.ts
+  581:1   warning  Function 'extractSkillsFromToolCalls' has a complexity of 27. Maximum allowed is 20           complexity
+  598:41  warning  Blocks are nested too deeply (5). Maximum allowed is 4                                        max-depth
+  799:21  warning  This assertion is unnecessary since it does not change the type of the expression             @typescript-eslint/no-unnecessary-type-assertion
+  938:8   warning  Function 'parseSessionFile' has a complexity of 21. Maximum allowed is 20                     complexity
+  945:14  warning  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+
+/Users/Amyote/.gemini/antigravity-ide/scratch/ai-engineering-coach/src/core/parser.bench.ts
+  168:16  warning  This assertion is unnecessary since it does not change the type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+  189:21  warning  This assertion is unnecessary since it does not change the type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+
+/Users/Amyote/.gemini/antigravity-ide/scratch/ai-engineering-coach/src/core/schemas.ts
+  114:18  warning  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+
+/Users/Amyote/.gemini/antigravity-ide/scratch/ai-engineering-coach/src/core/types/rpc-types.ts
+  54:1  warning  `../analyzer-images` type import should occur before type import of `./session-types`  import-x/order
+
+/Users/Amyote/.gemini/antigravity-ide/scratch/ai-engineering-coach/src/webview/app.ts
+   24:1  warning  `../core/constants` import should occur before import of `./shared`      import-x/order
+  356:1  warning  Function 'handleProgress' has a complexity of 34. Maximum allowed is 20  complexity
+  385:7  warning  Unsafe assignment to innerHTML                                           no-unsanitized/property
+
+/Users/Amyote/.gemini/antigravity-ide/scratch/ai-engineering-coach/src/webview/page-achievements.ts
+  498:177  warning  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+  500:99   warning  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+  557:49   warning  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+
+/Users/Amyote/.gemini/antigravity-ide/scratch/ai-engineering-coach/src/webview/page-antipatterns-editor.ts
+  297:46  warning  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+
+/Users/Amyote/.gemini/antigravity-ide/scratch/ai-engineering-coach/src/webview/page-antipatterns-heatmap.ts
+  146:71  warning  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+
+/Users/Amyote/.gemini/antigravity-ide/scratch/ai-engineering-coach/src/webview/page-burndown.ts
+  140:3  warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+  197:7  warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+  356:3  warning  Async function 'renderBurndownChart' has a complexity of 48. Maximum allowed is 20                                                                                  complexity
+
+/Users/Amyote/.gemini/antigravity-ide/scratch/ai-engineering-coach/src/webview/page-config.ts
+   94:9    warning  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+  372:105  warning  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+
+/Users/Amyote/.gemini/antigravity-ide/scratch/ai-engineering-coach/src/webview/page-context-mgmt.ts
+  51:73  warning  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+
+/Users/Amyote/.gemini/antigravity-ide/scratch/ai-engineering-coach/src/webview/page-dashboard.ts
+  395:48  warning  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+  396:55  warning  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+  407:75  warning  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+
+/Users/Amyote/.gemini/antigravity-ide/scratch/ai-engineering-coach/src/webview/page-experiments.ts
+  81:10  warning  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+
+/Users/Amyote/.gemini/antigravity-ide/scratch/ai-engineering-coach/src/webview/page-output.ts
+  510:19  warning  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+  719:19  warning  This assertion is unnecessary since it does not change the type of the expression             @typescript-eslint/no-unnecessary-type-assertion
+
+/Users/Amyote/.gemini/antigravity-ide/scratch/ai-engineering-coach/src/webview/page-sdlc.ts
+  90:240  warning  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+  91:71   warning  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+
+/Users/Amyote/.gemini/antigravity-ide/scratch/ai-engineering-coach/src/webview/page-skills.ts
+  184:65  warning  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+  274:96  warning  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+  298:62  warning  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+  352:72  warning  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+  366:71  warning  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+  409:94  warning  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+
+/Users/Amyote/.gemini/antigravity-ide/scratch/ai-engineering-coach/src/webview/panel-html.ts
+  8:1  warning  `../core/constants` import should occur before import of `./panel-shared`  import-x/order
+
+/Users/Amyote/.gemini/antigravity-ide/scratch/ai-engineering-coach/src/webview/panel-rpc.ts
+  41:1  warning  `../core/constants` import should occur before import of `./panel-shared`  import-x/order
+
+/Users/Amyote/.gemini/antigravity-ide/scratch/ai-engineering-coach/src/webview/panel.ts
+  265:3  warning  Method 'handleMessage' has a complexity of 24. Maximum allowed is 20  complexity
+
+✖ 84 problems (2 errors, 82 warnings)
+  0 errors and 56 warnings potentially fixable with the `--fix` option.
+

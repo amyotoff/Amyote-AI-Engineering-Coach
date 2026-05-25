@@ -299,11 +299,97 @@ function parseLlmJson<T>(text: string): T {
   throw new Error('Failed to parse JSON from LLM response');
 }
 
+export class NoLanguageModelError extends Error {
+  constructor() {
+    super('No language model available. Make sure GitHub Copilot is installed and signed in, or configure a Custom LLM Endpoint in settings.');
+    this.name = 'NoLanguageModelError';
+  }
+}
+
 const LLM_MAX_RETRIES = 2;
 const LLM_FAMILY = 'gpt-4.1';
 /** Hard cap for a single LLM streaming request (ms). Prevents the UI from
  *  spinning forever when the model hangs or the user never grants consent. */
 const LLM_REQUEST_TIMEOUT_MS = 90_000;
+
+interface CustomLlmConfig {
+  endpoint: string;
+  apiKey: string;
+  model: string;
+}
+
+function getCustomLlmConfig(): CustomLlmConfig | null {
+  const config = vscode.workspace.getConfiguration('aiEngineerCoach');
+  const endpoint = config.get<string>('llmEndpoint');
+  if (!endpoint) return null;
+  return {
+    endpoint,
+    apiKey: config.get<string>('llmApiKey') || '',
+    model: config.get<string>('llmModel') || 'gpt-4o',
+  };
+}
+
+async function callCustomLlm(
+  messages: vscode.LanguageModelChatMessage[],
+  config: CustomLlmConfig,
+  jsonSchema?: JsonSchemaSpec,
+  token?: vscode.CancellationToken,
+): Promise<string> {
+  const fetch = globalThis.fetch;
+  if (!fetch) throw new Error('fetch is not available in this runtime');
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  if (config.apiKey) headers['Authorization'] = `Bearer ${config.apiKey}`;
+  if (config.endpoint.includes('generativelanguage.googleapis.com')) {
+      if (config.apiKey) headers['x-goog-api-key'] = config.apiKey;
+      delete headers['Authorization'];
+  }
+
+  const payload: any = {
+    model: config.model,
+    messages: messages.map(m => ({
+      role: m.role === vscode.LanguageModelChatMessageRole.User ? 'user' :
+            m.role === vscode.LanguageModelChatMessageRole.Assistant ? 'assistant' : 'system',
+      content: m.content.map(c => (c as any).value || c).join(' ')
+    })),
+  };
+
+  if (jsonSchema) {
+    payload.response_format = {
+      type: 'json_schema',
+      json_schema: { name: jsonSchema.name, strict: true, schema: jsonSchema.schema }
+    };
+  }
+
+  const abortController = new AbortController();
+  if (token) {
+    token.onCancellationRequested(() => abortController.abort());
+  }
+
+  const response = await fetch(config.endpoint, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(payload),
+    signal: abortController.signal as any,
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`Custom LLM Error: ${response.status} ${response.statusText} - ${errText}`);
+  }
+
+  const data: any = await response.json();
+  if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+      if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+          // Gemini REST API compatibility
+          return data.candidates[0].content.parts.map((p: any) => p.text).join('');
+      }
+      throw new Error(`Unexpected LLM response format: ${JSON.stringify(data).substring(0, 100)}`);
+  }
+  return data.choices[0].message.content;
+}
 
 /**
  * Pick a Copilot chat model. Tries the preferred family first, then a short
@@ -318,7 +404,7 @@ async function selectModel(): Promise<vscode.LanguageModelChat> {
   }
   const any = await vscode.lm.selectChatModels({});
   if (any.length > 0) return any[0];
-  throw new Error('No language model available. Make sure GitHub Copilot is installed and signed in.');
+  throw new NoLanguageModelError();
 }
 
 /** Race a promise against a timeout. Rejects with a clear message on timeout. */
@@ -332,7 +418,28 @@ function withTimeout<T>(p: Promise<T>, ms: number, label: string): Promise<T> {
   });
 }
 
+function injectDate(messages: vscode.LanguageModelChatMessage[]) {
+    // Add TODAY IS rule to the first system message, or push a new one
+    const dateStr = `TODAY IS ${new Date().toISOString().split('T')[0]}.`;
+    const sysMsg = messages.find(m => m.role === vscode.LanguageModelChatMessageRole.System);
+    if (sysMsg) {
+        if (typeof sysMsg.content === 'string') sysMsg.content += `\n${dateStr}`;
+        else if (Array.isArray(sysMsg.content) && sysMsg.content.length > 0 && typeof sysMsg.content[0] === 'string') {
+            sysMsg.content[0] += `\n${dateStr}`;
+        }
+    } else {
+        messages.unshift(vscode.LanguageModelChatMessage.System(dateStr));
+    }
+}
+
 export async function callLlm(messages: vscode.LanguageModelChatMessage[]): Promise<string> {
+  injectDate(messages);
+  const customConfig = getCustomLlmConfig();
+  
+  if (customConfig) {
+      return callCustomLlm(messages, customConfig);
+  }
+
   const model = await selectModel();
 
   let lastError: unknown;
@@ -358,11 +465,8 @@ export async function callLlm(messages: vscode.LanguageModelChatMessage[]): Prom
 }
 
 export async function callLlmJson<T>(messages: vscode.LanguageModelChatMessage[], jsonSchema?: JsonSchemaSpec): Promise<T> {
-  const model = await selectModel();
-
-  const options: vscode.LanguageModelChatRequestOptions = jsonSchema
-    ? { modelOptions: structuredOutputOptions(jsonSchema) }
-    : {};
+  injectDate(messages);
+  const customConfig = getCustomLlmConfig();
 
   let lastError: unknown;
   let parseFailures = 0;
@@ -371,9 +475,18 @@ export async function callLlmJson<T>(messages: vscode.LanguageModelChatMessage[]
   for (let attempt = 0; attempt <= LLM_MAX_RETRIES; attempt++) {
     const cts = new vscode.CancellationTokenSource();
     try {
-      const response = await model.sendRequest(retryMessages, options, cts.token);
       let text = '';
-      for await (const chunk of response.text) text += chunk;
+      if (customConfig) {
+          text = await callCustomLlm(retryMessages, customConfig, attempt === 0 ? jsonSchema : undefined, cts.token);
+      } else {
+          const model = await selectModel();
+          const options: vscode.LanguageModelChatRequestOptions = (attempt === 0 && jsonSchema)
+            ? { modelOptions: structuredOutputOptions(jsonSchema) }
+            : {};
+          const response = await model.sendRequest(retryMessages, options, cts.token);
+          for await (const chunk of response.text) text += chunk;
+      }
+
       try {
         return JSON.parse(text.trim()) as T;
       } catch {
@@ -382,10 +495,8 @@ export async function callLlmJson<T>(messages: vscode.LanguageModelChatMessage[]
     } catch (err) {
       lastError = err;
       if (err instanceof vscode.CancellationError) { cts.dispose(); throw err; }
-      // If structured output isn't supported, fall back to plain mode
-      if (attempt === 0 && jsonSchema && lastError instanceof Error && /response_format|modelOptions|not supported/i.test(lastError.message)) {
-        options.modelOptions = undefined;
-      }
+      if (err instanceof NoLanguageModelError) throw err;
+      
       // On parse failures, nudge the model to return valid JSON on the next attempt
       if (lastError instanceof Error && /JSON|parse/i.test(lastError.message)) {
         parseFailures++;

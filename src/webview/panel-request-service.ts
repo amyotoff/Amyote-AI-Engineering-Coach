@@ -21,6 +21,7 @@ import {
   SCHEMA_QUIZ,
   SCHEMA_RESOURCES,
   SCHEMA_TRIAGE,
+  NoLanguageModelError,
 } from './panel-llm';
 import { getCatalogItems } from './panel-catalog';
 import { validateDateFilter } from './panel-rpc';
@@ -127,6 +128,10 @@ export class PanelRequestService {
     const handler = this.handlers[msg.method as CustomPanelMethodName];
     if (!handler) return false;
     void Promise.resolve(handler(msg)).catch((error: unknown) => {
+      if (error instanceof NoLanguageModelError) {
+        postResponse(this.webview, msg.id, { items: [], noModelError: true, _emptyFallback: true });
+        return;
+      }
       postError(this.webview, msg.id, error instanceof Error ? error.message : 'Internal error');
     });
     return true;
