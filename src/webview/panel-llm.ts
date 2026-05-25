@@ -7,6 +7,13 @@
 
 import * as vscode from 'vscode';
 
+let _secretStorage: vscode.SecretStorage | undefined;
+
+/** Called from extension.ts to provide SecretStorage for secure API key retrieval. */
+export function setSecretStorage(storage: vscode.SecretStorage): void {
+  _secretStorage = storage;
+}
+
 export interface JsonSchemaSpec {
   name: string;
   schema: Record<string, unknown>;
@@ -318,15 +325,35 @@ interface CustomLlmConfig {
   model: string;
 }
 
-function getCustomLlmConfig(): CustomLlmConfig | null {
+async function getCustomLlmConfig(): Promise<CustomLlmConfig | null> {
   const config = vscode.workspace.getConfiguration('aiEngineerCoach');
   const endpoint = config.get<string>('llmEndpoint');
   if (!endpoint) return null;
+  const apiKey = (await _secretStorage?.get('llmApiKey')) ?? '';
   return {
     endpoint,
-    apiKey: config.get<string>('llmApiKey') || '',
+    apiKey,
     model: config.get<string>('llmModel') || 'gpt-4o',
   };
+}
+
+interface OpenAIChoice {
+  message: { content: string };
+}
+interface GeminiCandidate {
+  content: { parts: Array<{ text: string }> };
+}
+interface LlmResponseData {
+  choices?: OpenAIChoice[];
+  candidates?: GeminiCandidate[];
+}
+
+function extractContentPartText(part: unknown): string {
+  if (typeof part === 'string') return part;
+  if (part && typeof part === 'object' && 'value' in part && typeof (part as { value: unknown }).value === 'string') {
+    return (part as { value: string }).value;
+  }
+  return String(part);
 }
 
 async function callCustomLlm(
@@ -347,12 +374,12 @@ async function callCustomLlm(
       delete headers['Authorization'];
   }
 
-  const payload: any = {
+  const payload: Record<string, unknown> = {
     model: config.model,
     messages: messages.map(m => ({
       role: m.role === vscode.LanguageModelChatMessageRole.User ? 'user' :
             m.role === vscode.LanguageModelChatMessageRole.Assistant ? 'assistant' : 'system',
-      content: m.content.map(c => (c as any).value || c).join(' ')
+      content: m.content.map(extractContentPartText).join(' ')
     })),
   };
 
@@ -364,31 +391,36 @@ async function callCustomLlm(
   }
 
   const abortController = new AbortController();
+  const timeoutId = setTimeout(() => abortController.abort(), LLM_REQUEST_TIMEOUT_MS);
   if (token) {
     token.onCancellationRequested(() => abortController.abort());
   }
 
-  const response = await fetch(config.endpoint, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(payload),
-    signal: abortController.signal as any,
-  });
+  try {
+    const response = await fetch(config.endpoint, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload),
+      signal: abortController.signal,
+    });
 
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(`Custom LLM Error: ${response.status} ${response.statusText} - ${errText}`);
-  }
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(`Custom LLM Error: ${response.status} ${response.statusText} - ${errText}`);
+    }
 
-  const data: any = await response.json();
-  if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-      if (data.candidates && data.candidates[0] && data.candidates[0].content) {
-          // Gemini REST API compatibility
-          return data.candidates[0].content.parts.map((p: any) => p.text).join('');
-      }
-      throw new Error(`Unexpected LLM response format: ${JSON.stringify(data).substring(0, 100)}`);
+    const data = await response.json() as LlmResponseData;
+    if (data.choices?.[0]?.message) {
+      return data.choices[0].message.content;
+    }
+    if (data.candidates?.[0]?.content) {
+      // Gemini REST API compatibility
+      return data.candidates[0].content.parts.map(p => p.text).join('');
+    }
+    throw new Error(`Unexpected LLM response format: ${JSON.stringify(data).substring(0, 100)}`);
+  } finally {
+    clearTimeout(timeoutId);
   }
-  return data.choices[0].message.content;
 }
 
 /**
@@ -418,26 +450,23 @@ function withTimeout<T>(p: Promise<T>, ms: number, label: string): Promise<T> {
   });
 }
 
-function injectDate(messages: vscode.LanguageModelChatMessage[]) {
-    // Add TODAY IS rule to the first system message, or push a new one
+/**
+ * Returns a new message array with the current date prepended as a User message.
+ * Does NOT mutate the original array or its messages.
+ */
+function withDateInjected(messages: vscode.LanguageModelChatMessage[]): vscode.LanguageModelChatMessage[] {
     const dateStr = `TODAY IS ${new Date().toISOString().split('T')[0]}.`;
-    const sysMsg = messages.find(m => m.role === vscode.LanguageModelChatMessageRole.System);
-    if (sysMsg) {
-        if (typeof sysMsg.content === 'string') sysMsg.content += `\n${dateStr}`;
-        else if (Array.isArray(sysMsg.content) && sysMsg.content.length > 0 && typeof sysMsg.content[0] === 'string') {
-            sysMsg.content[0] += `\n${dateStr}`;
-        }
-    } else {
-        messages.unshift(vscode.LanguageModelChatMessage.System(dateStr));
-    }
+    // Prepend as a User message, matching the codebase convention
+    // (vscode.LanguageModelChatMessage does not have a System role in stable API).
+    return [vscode.LanguageModelChatMessage.User(dateStr), ...messages];
 }
 
 export async function callLlm(messages: vscode.LanguageModelChatMessage[]): Promise<string> {
-  injectDate(messages);
-  const customConfig = getCustomLlmConfig();
+  const dated = withDateInjected(messages);
+  const customConfig = await getCustomLlmConfig();
   
   if (customConfig) {
-      return callCustomLlm(messages, customConfig);
+      return callCustomLlm(dated, customConfig);
   }
 
   const model = await selectModel();
@@ -447,7 +476,7 @@ export async function callLlm(messages: vscode.LanguageModelChatMessage[]): Prom
     const cts = new vscode.CancellationTokenSource();
     try {
       const streamText = async () => {
-        const response = await model.sendRequest(messages, {}, cts.token);
+        const response = await model.sendRequest(dated, {}, cts.token);
         let text = '';
         for await (const chunk of response.text) text += chunk;
         return text;
@@ -465,12 +494,12 @@ export async function callLlm(messages: vscode.LanguageModelChatMessage[]): Prom
 }
 
 export async function callLlmJson<T>(messages: vscode.LanguageModelChatMessage[], jsonSchema?: JsonSchemaSpec): Promise<T> {
-  injectDate(messages);
-  const customConfig = getCustomLlmConfig();
+  const dated = withDateInjected(messages);
+  const customConfig = await getCustomLlmConfig();
 
   let lastError: unknown;
   let parseFailures = 0;
-  const retryMessages = [...messages];
+  const retryMessages = [...dated];
 
   for (let attempt = 0; attempt <= LLM_MAX_RETRIES; attempt++) {
     const cts = new vscode.CancellationTokenSource();

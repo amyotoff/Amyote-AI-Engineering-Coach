@@ -17,7 +17,7 @@
     "url": "https://github.com/microsoft/AI-Engineering-Coach/issues"
   },
   "engines": {
-    "vscode": "^1.107.0"
+    "vscode": "^1.118.0"
   },
   "categories": [
     "Other",
@@ -56,6 +56,11 @@
         "command": "aiEngineerCoach.reviewLocalRules",
         "title": "AI Engineer Coach: Review Local Rule Approvals",
         "icon": "$(shield)"
+      },
+      {
+        "command": "aiEngineerCoach.setLlmApiKey",
+        "title": "AI Engineer Coach: Set Custom LLM API Key",
+        "icon": "$(key)"
       }
     ],
     "viewsContainers": {
@@ -107,11 +112,6 @@
           "default": "",
           "description": "Custom OpenAI-compatible LLM endpoint (e.g. http://localhost:11434/v1/chat/completions). If empty, uses GitHub Copilot (vscode.lm)."
         },
-        "aiEngineerCoach.llmApiKey": {
-          "type": "string",
-          "default": "",
-          "description": "Optional API key for the custom LLM endpoint."
-        },
         "aiEngineerCoach.llmModel": {
           "type": "string",
           "default": "",
@@ -159,7 +159,7 @@
     "@eslint/js": "10.0.1",
     "@playwright/test": "1.60.0",
     "@types/node": "25.9.1",
-    "@types/vscode": "1.107.0",
+    "@types/vscode": "1.118.0",
     "@vitest/coverage-v8": "4.1.6",
     "@vscode/vsce": "3.9.1",
     "cspell": "10.0.0",

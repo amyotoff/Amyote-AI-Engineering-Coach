@@ -652,7 +652,12 @@ export async function parseAllLogsViaWorker(
       try {
         child = forkFn(workerPath, [], {
           execArgv: [`--max-old-space-size=${maxOldSpaceMb}`],
-          env: { ...process.env, ENABLED_HARNESSES: JSON.stringify(enabledHarnesses || []) },
+          env: {
+            ...process.env,
+            ...(enabledHarnesses && enabledHarnesses.length > 0
+              ? { ENABLED_HARNESSES: JSON.stringify(enabledHarnesses) }
+              : {}),
+          },
           stdio: ['ignore', 'ignore', 'ignore', 'ipc'],
         });
       } catch {
