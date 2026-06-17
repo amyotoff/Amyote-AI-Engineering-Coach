@@ -70,30 +70,40 @@ AI Engineer Coach reads your local AI session logs and turns them into actionabl
 
 ## Quick Start
 
+First, build the extension from source:
+
 ```bash
 git clone https://github.com/amyotoff/Amyote-AI-Engineering-Coach.git
 cd Amyote-AI-Engineering-Coach
 npm install
 npm run package
 ```
+This will generate an `ai-engineer-coach-<version>.vsix` file in your directory.
 
-Then install the `.vsix`:
+### Option 1: Install via VS Code UI (Easiest)
+
+1. Open VS Code and go to the **Extensions** view (`Cmd+Shift+X` / `Ctrl+Shift+X`).
+2. Click the **...** (Views and More Actions) menu at the top right of the Extensions panel.
+3. Select **Install from VSIX...**
+4. Locate and select the generated `.vsix` file.
+
+### Option 2: Install via Command Line
 
 **macOS / Linux**
-
 ```bash
 code --install-extension ai-engineer-coach-*.vsix
 ```
 
 **Windows / PowerShell**
-
 ```powershell
 code --install-extension (Get-ChildItem . -Filter 'ai-engineer-coach-*.vsix' | Select-Object -First 1).FullName
 ```
 
-1. Open the command palette (`Cmd+Shift+P` / `Ctrl+Shift+P`)
-2. Run **AI Engineer Coach: Open Dashboard**
-3. Navigate pages from the sidebar, filter by workspace or harness
+### Next Steps
+
+1. Open the command palette (`Cmd+Shift+P` / `Ctrl+Shift+P`).
+2. Run **AI Engineer Coach: Open Dashboard**.
+3. Navigate pages from the sidebar, filter by workspace or harness.
 
 ---
 
